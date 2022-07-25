@@ -32,24 +32,28 @@ class LogConsoleState extends State<LogConsole> {
   @override
   void initState() {
     super.initState();
-    if (rootKey.currentState != null && !widget.isRoot) {
-      filteredBuffer =
-          List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
-    }
-    eventBus.on<LogMessage>().listen((event) {
-      if (filteredBuffer.length == _bufferSize) {
-        filteredBuffer.removeAt(0);
+    WidgetsBinding.instance.endOfFrame.then((_) {
+      if (mounted) {
+        if (rootKey.currentState != null && !widget.isRoot) {
+          filteredBuffer =
+              List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
+        }
+        eventBus.on<LogMessage>().listen((event) {
+          if (filteredBuffer.length == _bufferSize) {
+            filteredBuffer.removeAt(0);
+          }
+          filteredBuffer.add(_renderMessage(event.message));
+          setState(() {});
+        });
+        _scrollController.addListener(() {
+          if (!_scrollListenerEnabled) return;
+          var scrolledToBottom = _scrollController.offset >=
+              _scrollController.position.maxScrollExtent;
+          setState(() {
+            _followBottom = scrolledToBottom;
+          });
+        });
       }
-      filteredBuffer.add(_renderMessage(event.message));
-      setState(() {});
-    });
-    _scrollController.addListener(() {
-      if (!_scrollListenerEnabled) return;
-      var scrolledToBottom = _scrollController.offset >=
-          _scrollController.position.maxScrollExtent;
-      setState(() {
-        _followBottom = scrolledToBottom;
-      });
     });
   }
 
