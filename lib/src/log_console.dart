@@ -9,6 +9,7 @@ class LogConsole extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final Color? backgroundColor;
   final bool isRoot;
+
   LogConsole({
     this.dark = false,
     this.showCloseButton = false,
@@ -36,22 +37,25 @@ class LogConsoleState extends State<LogConsole> {
       if (mounted) {
         if (rootKey.currentState != null && !widget.isRoot) {
           filteredBuffer =
-              List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
+          List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
         }
         eventBus.on<LogMessage>().listen((event) {
           if (filteredBuffer.length == _bufferSize) {
             filteredBuffer.removeAt(0);
           }
           filteredBuffer.add(_renderMessage(event.message));
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
         _scrollController.addListener(() {
           if (!_scrollListenerEnabled) return;
           var scrolledToBottom = _scrollController.offset >=
               _scrollController.position.maxScrollExtent;
-          setState(() {
-            _followBottom = scrolledToBottom;
-          });
+          _followBottom = scrolledToBottom;
+          if (mounted) {
+            setState(() {});
+          }
         });
       }
     });
@@ -71,13 +75,13 @@ class LogConsoleState extends State<LogConsole> {
         padding: widget.borderEnable ? EdgeInsets.all(10) : null,
         decoration: widget.borderEnable
             ? BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: widget.backgroundColor,
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 5.0,
-                ),
-              )
+          borderRadius: BorderRadius.circular(10),
+          color: widget.backgroundColor,
+          border: Border.all(
+            color: Colors.grey,
+            width: 5.0,
+          ),
+        )
             : BoxDecoration(color: widget.backgroundColor),
         child: _buildLogContent(),
       ),
@@ -108,8 +112,8 @@ class LogConsoleState extends State<LogConsole> {
           height: constraints.maxHeight,
           decoration: widget.borderEnable
               ? BoxDecoration(
-                  color: widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(10))
+              color: widget.backgroundColor,
+              borderRadius: BorderRadius.circular(10))
               : null,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -137,9 +141,10 @@ class LogConsoleState extends State<LogConsole> {
   void _scrollToBottom() async {
     _scrollListenerEnabled = false;
 
-    setState(() {
-      _followBottom = true;
-    });
+    _followBottom = true;
+    if (mounted) {
+      setState(() {});
+    }
 
     var scrollPosition = _scrollController.position;
     await _scrollController.animateTo(
