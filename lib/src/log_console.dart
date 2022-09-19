@@ -37,7 +37,7 @@ class LogConsoleState extends State<LogConsole> {
       if (mounted) {
         if (rootKey.currentState != null && !widget.isRoot) {
           filteredBuffer =
-          List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
+              List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
         }
         eventBus.on<LogMessage>().listen((event) {
           if (filteredBuffer.length == _bufferSize) {
@@ -48,17 +48,26 @@ class LogConsoleState extends State<LogConsole> {
             setState(() {});
           }
         });
-        _scrollController.addListener(() {
-          if (!_scrollListenerEnabled) return;
-          var scrolledToBottom = _scrollController.offset >=
-              _scrollController.position.maxScrollExtent;
-          _followBottom = scrolledToBottom;
-          if (mounted) {
-            setState(() {});
-          }
-        });
+        _scrollController.addListener(listener);
       }
     });
+  }
+
+  void listener() {
+    if (!_scrollListenerEnabled) return;
+    var scrolledToBottom =
+        _scrollController.offset >= _scrollController.position.maxScrollExtent;
+    _followBottom = scrolledToBottom;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(listener);
+    //Logger.removeOutputListener(_callback);
+    super.dispose();
   }
 
   TextSpan _renderMessage(String message) {
@@ -75,13 +84,13 @@ class LogConsoleState extends State<LogConsole> {
         padding: widget.borderEnable ? EdgeInsets.all(10) : null,
         decoration: widget.borderEnable
             ? BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: widget.backgroundColor,
-          border: Border.all(
-            color: Colors.grey,
-            width: 5.0,
-          ),
-        )
+                borderRadius: BorderRadius.circular(10),
+                color: widget.backgroundColor,
+                border: Border.all(
+                  color: Colors.grey,
+                  width: 5.0,
+                ),
+              )
             : BoxDecoration(color: widget.backgroundColor),
         child: _buildLogContent(),
       ),
@@ -112,8 +121,8 @@ class LogConsoleState extends State<LogConsole> {
           height: constraints.maxHeight,
           decoration: widget.borderEnable
               ? BoxDecoration(
-              color: widget.backgroundColor,
-              borderRadius: BorderRadius.circular(10))
+                  color: widget.backgroundColor,
+                  borderRadius: BorderRadius.circular(10))
               : null,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -154,11 +163,5 @@ class LogConsoleState extends State<LogConsole> {
     );
 
     _scrollListenerEnabled = true;
-  }
-
-  @override
-  void dispose() {
-    //Logger.removeOutputListener(_callback);
-    super.dispose();
   }
 }
