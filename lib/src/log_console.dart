@@ -2,6 +2,9 @@ part of logger_flutter;
 
 int _bufferSize = 250;
 
+final ValueNotifier<List<TextSpan>> filteredBuffer =
+    ValueNotifier<List<TextSpan>>([]);
+
 class LogConsole extends StatefulWidget {
   final bool dark;
   final bool showCloseButton;
@@ -17,37 +20,53 @@ class LogConsole extends StatefulWidget {
     this.padding,
     this.backgroundColor,
     this.isRoot = false,
-  }) : super(key: isRoot ? rootKey : null);
+  }) : super(
+          key: isRoot ? rootKey : null,
+        );
 
   @override
   LogConsoleState createState() => LogConsoleState();
 }
 
 class LogConsoleState extends State<LogConsole> {
-  List<TextSpan> filteredBuffer = [];
   var _scrollController = ScrollController();
   double _logFontSize = 14;
   bool _scrollListenerEnabled = true;
   bool _followBottom = true;
+  StreamSubscription? _sub;
+
+  static StreamSubscription listenEvent({bool dark = false}) {
+    return eventBus.on<LogMessage>().listen((event) {
+      var buffers = List<TextSpan>.from(filteredBuffer.value);
+      if (buffers.length == _bufferSize) {
+        buffers.removeAt(0);
+      }
+      var parser = AnsiParser(dark: dark);
+      parser.parse(event.message);
+      buffers.add(TextSpan(children: parser.spans));
+      filteredBuffer.value = buffers;
+    });
+  }
+
+  static void clearLog() {
+    filteredBuffer.value = <TextSpan>[];
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.endOfFrame.then((_) {
       if (mounted) {
-        if (rootKey.currentState != null && !widget.isRoot) {
-          filteredBuffer =
-              List<TextSpan>.from(rootKey.currentState!.filteredBuffer);
+        if (widget.isRoot) {
+          _sub = eventBus.on<LogMessage>().listen((event) {
+            var buffers = List<TextSpan>.from(filteredBuffer.value);
+            if (buffers.length == _bufferSize) {
+              buffers.removeAt(0);
+            }
+            buffers.add(_renderMessage(event.message));
+            filteredBuffer.value = buffers;
+          });
         }
-        eventBus.on<LogMessage>().listen((event) {
-          if (filteredBuffer.length == _bufferSize) {
-            filteredBuffer.removeAt(0);
-          }
-          filteredBuffer.add(_renderMessage(event.message));
-          if (mounted) {
-            setState(() {});
-          }
-        });
         _scrollController.addListener(listener);
       }
     });
@@ -66,7 +85,10 @@ class LogConsoleState extends State<LogConsole> {
   @override
   void dispose() {
     _scrollController.removeListener(listener);
-    //Logger.removeOutputListener(_callback);
+    _sub?.cancel();
+    if (widget.isRoot) {
+      filteredBuffer.value = <TextSpan>[];
+    }
     super.dispose();
   }
 
@@ -128,17 +150,22 @@ class LogConsoleState extends State<LogConsole> {
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: 1600,
-              child: ListView.builder(
-                shrinkWrap: true,
-                controller: _scrollController,
-                itemBuilder: (context, index) {
-                  var logEntry = filteredBuffer[index];
-                  return Text.rich(
-                    logEntry,
-                    style: GoogleFonts.lato(fontSize: _logFontSize),
+              child: ValueListenableBuilder<List<TextSpan>>(
+                valueListenable: filteredBuffer,
+                builder: (context, value, child) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    itemBuilder: (context, index) {
+                      var logEntry = value[index];
+                      return Text.rich(
+                        logEntry,
+                        style: GoogleFonts.lato(fontSize: _logFontSize),
+                      );
+                    },
+                    itemCount: value.length,
                   );
                 },
-                itemCount: filteredBuffer.length,
               ),
             ),
           ),
