@@ -1,17 +1,16 @@
 name: logger_flutter
 description: Flutter extension for logger. Please go there for documentation.
 version: 1.0.2
-author: InspireUI
 homepage: https://inspireui.com
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  logger: 1.2.2
+  logger: 1.4.0
   sensors: 2.0.3
-  google_fonts: ^4.0.3
+  google_fonts: ^4.0.4
   event_bus: 2.0.0
