@@ -1,26 +1,27 @@
 import 'dart:convert';
-import 'package:logger/logger.dart';
-import '../constant.dart';
 
+import 'package:logger/logger.dart';
+
+import '../constant.dart';
 import 'ansi_color.dart';
 
 class CustomPrinter extends LogPrinter {
   static final levelColors = {
-    Level.verbose: CustomAnsiColor.fg(CustomAnsiColor.grey(0.5)),
+    Level.trace: CustomAnsiColor.fg(CustomAnsiColor.grey(0.5)),
     Level.debug: CustomAnsiColor.none(),
     Level.info: CustomAnsiColor.fg(12),
     Level.warning: CustomAnsiColor.fg(208),
     Level.error: CustomAnsiColor.fg(196),
-    Level.wtf: CustomAnsiColor.fg(199),
+    Level.fatal: CustomAnsiColor.fg(199),
   };
 
   static final levelEmojis = {
-    Level.verbose: '',
+    Level.trace: '',
     Level.debug: '🐛 ',
     Level.info: '💡 ',
     Level.warning: '⚠️ ',
     Level.error: '⛔ ',
-    Level.wtf: '👾 ',
+    Level.fatal: '👾 ',
   };
 
   static final stackTraceRegex = RegExp(r'#[0-9]+[\s]+(.+) \(([^\s]+)\)');
@@ -125,8 +126,8 @@ class CustomPrinter extends LogPrinter {
   }
 
   CustomAnsiColor _getErrorColor(Level level) {
-    if (level == Level.wtf) {
-      return levelColors[Level.wtf]!.toBg();
+    if (level == Level.fatal) {
+      return levelColors[Level.fatal]!.toBg();
     } else {
       return levelColors[Level.error]!.toBg();
     }

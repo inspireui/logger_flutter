@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  logger: 1.4.0
+  logger: 2.0.1
   sensors: 2.0.3
-  google_fonts: ^4.0.4
+  google_fonts: ^5.1.0
   event_bus: 2.0.0
