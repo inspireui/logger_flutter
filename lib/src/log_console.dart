@@ -12,6 +12,8 @@ class LogConsole extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final Color? backgroundColor;
   final bool isRoot;
+  final TextEditingController? controller;
+  final void Function(String)? onSubmitted;
 
   LogConsole({
     this.dark = false,
@@ -20,6 +22,8 @@ class LogConsole extends StatefulWidget {
     this.padding,
     this.backgroundColor,
     this.isRoot = false,
+    this.controller,
+    this.onSubmitted,
   }) : super(
           key: isRoot ? rootKey : null,
         );
@@ -114,7 +118,19 @@ class LogConsoleState extends State<LogConsole> {
                 ),
               )
             : BoxDecoration(color: widget.backgroundColor),
-        child: _buildLogContent(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildLogContent(),
+            ),
+            if (widget.controller != null) 
+              CupertinoTextField(
+                controller: widget.controller,
+                onSubmitted: widget.onSubmitted,
+              ),
+          ],
+        ),
       ),
       floatingActionButton: AnimatedOpacity(
         opacity: _followBottom ? 0 : 1,
