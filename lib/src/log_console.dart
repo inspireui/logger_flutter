@@ -14,6 +14,7 @@ class LogConsole extends StatefulWidget {
   final bool isRoot;
   final TextEditingController? controller;
   final void Function(String)? onSubmitted;
+  final double? contentWidth;
 
   LogConsole({
     this.dark = false,
@@ -24,6 +25,7 @@ class LogConsole extends StatefulWidget {
     this.isRoot = false,
     this.controller,
     this.onSubmitted,
+    this.contentWidth,
   }) : super(
           key: isRoot ? rootKey : null,
         );
@@ -105,7 +107,7 @@ class LogConsoleState extends State<LogConsole> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.withOpacity(0.0),
+      backgroundColor: Colors.grey.withValues(alpha: 0.0),
       body: Container(
         padding: widget.borderEnable ? EdgeInsets.all(10) : null,
         decoration: widget.borderEnable
@@ -124,7 +126,7 @@ class LogConsoleState extends State<LogConsole> {
             Expanded(
               child: _buildLogContent(),
             ),
-            if (widget.controller != null) 
+            if (widget.controller != null)
               CupertinoTextField(
                 controller: widget.controller,
                 onSubmitted: widget.onSubmitted,
@@ -165,7 +167,7 @@ class LogConsoleState extends State<LogConsole> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: 1600,
+              width: widget.contentWidth ?? 1600,
               child: ValueListenableBuilder<List<TextSpan>>(
                 valueListenable: filteredBuffer,
                 builder: (context, value, child) {
