@@ -12,5 +12,5 @@ dependencies:
 
   logger: ^2.4.0
   sensors: 2.0.3
-  google_fonts: ^6.1.0
+  google_fonts: ^8.0.2
   event_bus: ^2.0.1
